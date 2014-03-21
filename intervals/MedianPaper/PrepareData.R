@@ -15,7 +15,7 @@ g_legend<-function(a.gplot){
 }
 
 #load("/Users/stanfill/Dropbox/Rotation matrices/Melissa data/datasetnickel.RData")
-load("C:/Users/Brittney Ritchey/Dropbox/Rotation matrices/Melissa data/datasetnickel.RData")
+load("C:/Users/Sta36z/Dropbox/Rotation matrices/Melissa data/datasetnickel.RData")
 
 dat.out <- adply(data, .margins= c(1,3), function(x) {
   as.vector(x)
