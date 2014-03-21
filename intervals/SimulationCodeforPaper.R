@@ -106,11 +106,13 @@ date()
 resultsDf
 
 #write.csv(resultsDf,"Results/ResultsB5000M300Part2.csv")
-#resultsDf<-read.csv("Results/ResultsB10000M300.csv")[,-1]
+resultsDf<-read.csv("Results/ResultsB10000M300.csv")[,-1]
 resM<-melt(resultsDf,id=c('Dist','nu','n'))
 colnames(resM)[4]<-'Method'
 #levels(resM$Method)[3:4]<-c("Nordman Normal","Nordman Bootstrap")
-levels(resM$Method)<-c("Directional(LSA)","Directional(Boot)","Direct(LSA)","Direct(Boot)")
+#levels(resM$Method)<-c("Directional(LSA)","Directional(Boot)","Direct(LSA)","Direct(Boot)")
+levels(resM$Method)<-c("NormT","BootT","NormD","BootD")
+
 
 levels(resM$Dist)<-c("Cayley","matrix~~Fisher","circular-von~~Mises")
 #Order alphabetically
@@ -142,10 +144,11 @@ qplot(n,value,data=resM[resM$nu!="nu == 0.50",],col=Method,linetype=Method,ylab=
   scale_linetype_manual(values = rep(c("dashed","solid"),2))+
   scale_colour_manual(values = rep(c("gray50","black"),each=2))+
   facet_grid(Dist~nu,labeller=label_parsed)+
-  geom_hline(yintercept=(alp+c(-.01,.01,0))*100,colour=c('gray75','gray75','gray50'))+geom_line(lwd=I(1),alpha=I(.8))+geom_point(size=I(1))+
+  geom_hline(yintercept=(alp+c(-.01,.01,0))*100,colour=c('gray75','gray75','gray50'))+geom_line(lwd=I(.9),alpha=I(.8))+geom_point(size=I(1))+
   scale_x_continuous(breaks=c(10,20,50,100))+theme_bw()+coord_fixed(2.5)+
-  theme(legend.key.width=unit(1.5,"line"),legend.position='top',panel.margin = unit(.75, "lines"))
+  theme(legend.key.width=unit(2,"line"),legend.position='top',panel.margin = unit(.75, "lines"))
 #ggsave("/Users/stanfill/Dropbox/Thesis/Intervals - Mean/Figures/CoverRatesB10000No5.pdf",width=7,height=6)
+ggsave("C:/Users/Sta36z/Dropbox/Rotation matrices/Papers/Intervals_Mean/Figures/CoverRatesB10000No5.pdf",width=6.5,height=6)
 
 qplot(n,value,data=resM[resM$nu!="nu == 0.50",],col=Method,linetype=Method,ylab='Coverage Rate (%)',xlab='Sample Size',ylim=c(80,100),geom='blank')+
   scale_linetype_manual(values = rep(c("dashed","solid"),2))+
@@ -225,19 +228,20 @@ qplot(n,value,data=resMnoCVM,col=Method,linetype=Method,ylab='Coverage Rate (%)'
 ###############################################################
 setwd("/Users/stanfill/Documents/GitHub/rotationsC/intervals")
 library(Rcpp)
-Rcpp::sourceCpp('ZhangMethod.cpp')
-Rcpp::sourceCpp("FisherMethod.cpp")
+Rcpp::sourceCpp('intervals/ZhangMethod.cpp')
+Rcpp::sourceCpp("intervals/FisherMethod.cpp")
 #Rcpp::sourceCpp('rotations2/src/estimators.cpp')
 library(rotations)
 library(reshape2)
 library(plyr)
-source("IntervalFuns.R")
+source("intervals/IntervalFuns.R")
 
-n<-c(10,50,100,300)
+#n<-c(10,50,100,300)
+n<-c(10,20,50,100)
 
 ks<-c(2,8)
-B<-1000				#Number of samples to use to estimate CDF
-Dist<-'none'
+B<-5000				#Number of samples to use to estimate CDF
+Dist<-'cayley'
 
 if(Dist=='cayley'){
 	rangle<-rcayley
@@ -266,7 +270,7 @@ for(j in 1:simSize){
 		#ShatMean<-HartmedianSO3C(Rs,100,1e-5)
 		#ShatMean<-Q4(as.SO3(matrix(ShatMean,nrow=1)))
     
-		rs2<-dist(Rs,ShatMean,method='intrinsic')
+		rs2<-rot.dist(Rs,ShatMean,method='intrinsic')
 		cosrs<-cos(rs2)
     
 		#cosrs<-cos(rs)
@@ -303,7 +307,9 @@ chiDF$ID<-paste(chiDF$kappa,chiDF$n)
 
 fullDF<-rbind(resM,chiDF)
 
-Newlabs<-c("Chisq","10","50","100","300")
+#Newlabs<-c("Chisq","10","50","100","300")
+Newlabs<-c("Chisq","10","20","50","100")
+
 
 fullDF$n<-factor(fullDF$n,levels=Newlabs)
 fullDF$Stat<-1
